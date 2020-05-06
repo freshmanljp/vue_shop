@@ -5,3 +5,15 @@ body,
 	padding: 0;
 	height: 100%;
 }
+
+.el-breadcrumb {
+  margin-bottom: 20px;
+  font-size: 12px
+}
+.el-table {
+  margin-top: 20px;
+  font-size: 12px;
+}
+.el-pagination {
+  margin-top: 20px;
+}
