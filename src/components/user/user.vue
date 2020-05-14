@@ -13,7 +13,9 @@
         <!-- row分成24份 -->
         <el-col :span="10">
           <!-- 搜索框部分，clearable配置是否可清空输入框,清空时触发clear事件 -->
-          <el-input placeholder="请输入内容" v-model="queryParams.query" clearable @clear="getUserList"><el-button slot="append" icon="el-icon-search" @click="getUserList"></el-button></el-input>
+          <el-input placeholder="请输入内容" v-model="queryParams.query" clearable @clear="getUserList">
+            <el-button slot="append" icon="el-icon-search" @click="getUserList"></el-button>
+          </el-input>
         </el-col>
         <!-- 添加用户按钮，设置对话框可见 -->
         <el-col :span="6"><el-button type="primary" @click="adddialogVisible = true">添加用户</el-button></el-col>
@@ -22,18 +24,10 @@
       <el-dialog :visible.sync="adddialogVisible" width="50%" title="添加用户" @close="adduserClosed">
         <!-- 用户添加表达部分，包含验证表达数据 -->
         <el-form ref="adduserRef" :model="addUser" label-width="80px" :rules="adduserRules">
-          <el-form-item label="用户名" prop="username">
-            <el-input v-model="addUser.username"></el-input>
-          </el-form-item>
-          <el-form-item label="密码" prop="password">
-            <el-input v-model="addUser.password"></el-input>
-          </el-form-item>
-          <el-form-item label="邮箱" prop="email">
-            <el-input v-model="addUser.email"></el-input>
-          </el-form-item>
-          <el-form-item label="电话" prop="mobile">
-            <el-input v-model="addUser.mobile"></el-input>
-          </el-form-item>
+          <el-form-item label="用户名" prop="username"><el-input v-model="addUser.username"></el-input></el-form-item>
+          <el-form-item label="密码" prop="password"><el-input v-model="addUser.password"></el-input></el-form-item>
+          <el-form-item label="邮箱" prop="email"><el-input v-model="addUser.email"></el-input></el-form-item>
+          <el-form-item label="电话" prop="mobile"><el-input v-model="addUser.mobile"></el-input></el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="adddialogVisible = false">取 消</el-button>
@@ -45,15 +39,9 @@
         <!-- 用户添加表单部分，包含验证表达数据，:model绑定的是表单默认数值 -->
         <el-form ref="edituserRef" :model="editUser" label-width="80px" :rules="edituserRules">
           <!-- prop是用于表单验证的输入框绑定 -->
-          <el-form-item label="用户名" prop="username">
-            <el-input v-model="editUser.username" disabled></el-input>
-          </el-form-item>
-          <el-form-item label="邮箱" prop="email">
-            <el-input v-model="editUser.email"></el-input>
-          </el-form-item>
-          <el-form-item label="电话" prop="mobile">
-            <el-input v-model="editUser.mobile"></el-input>
-          </el-form-item>
+          <el-form-item label="用户名" prop="username"><el-input v-model="editUser.username" disabled></el-input></el-form-item>
+          <el-form-item label="邮箱" prop="email"><el-input v-model="editUser.email"></el-input></el-form-item>
+          <el-form-item label="电话" prop="mobile"><el-input v-model="editUser.mobile"></el-input></el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="editdialogVisible = false">取 消</el-button>
@@ -74,16 +62,33 @@
             <el-switch v-model="slotProps.row.mg_state" @change="userStateChange(slotProps.row)"></el-switch>
           </template>
         </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column label="操作" width="180px">
           <template v-slot:default="slotProps">
             <!-- 用户信息修改按钮 -->
-            <el-button type="primary" icon="el-icon-edit" size="medium" @click="showeditDialog(slotProps.row.id)"></el-button>
+            <el-button type="primary" icon="el-icon-edit" size="mini" @click="showeditDialog(slotProps.row.id)"></el-button>
             <!-- 用户删除按钮 -->
-            <el-button type="danger" icon="el-icon-delete" size="medium" @click="deletebyId(slotProps.row.id)"></el-button>
+            <el-button type="danger" icon="el-icon-delete" size="mini" @click="deletebyId(slotProps.row.id)"></el-button>
             <!-- 配置按钮弹出消息提醒,禁止鼠标进入提示框 -->
             <el-tooltip class="item" effect="dark" content="角色分配" placement="top" :enterable="false">
-              <el-button type="warning" icon="el-icon-setting" size="medium"></el-button>
+              <el-button type="warning" icon="el-icon-setting" size="mini" @click="setRole(slotProps.row)"></el-button>
             </el-tooltip>
+            <!-- 角色分配对话框 -->
+            <el-dialog title="角色分配" :visible.sync="setroledialogVisible" width="50%" @close='setroleClose'>
+              <div>
+                <p>当前用户： {{ userInfo.username }}</p>
+                <p>当前角色： {{ userInfo.role_name }}</p>
+                <p>
+                  分配新角色：
+                  <el-select v-model="roleId" placeholder="请选择">
+                    <el-option v-for="item in roleList" :key="item.id" :label="item.roleName" :value="item.id"></el-option>
+                  </el-select>
+                </p>
+              </div>
+              <span slot="footer" class="dialog-footer">
+                <el-button @click="setroledialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="setroleSubmit">确 定</el-button>
+              </span>
+            </el-dialog>
           </template>
         </el-table-column>
       </el-table>
@@ -134,6 +139,8 @@ export default {
       // 添加和修改用户对话框是否可视
       adddialogVisible: false,
       editdialogVisible: false,
+      // 分配角色对话框是否可视
+      setroledialogVisible: false,
       // 添加用户表单数据
       addUser: {
         username: '',
@@ -143,36 +150,24 @@ export default {
       },
       // 添加用户表单规则验证
       adduserRules: {
-        username: [
-          { required: true, message: '请输入用户名', trigger: 'blur' },
-          { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
-        ],
-        password: [
-          { required: true, message: '请输入密码', trigger: 'blur' },
-          { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
-        ],
-        email: [
-          { required: true, message: '请输入邮箱', trigger: 'blur' },
-          { validator: checkEmail, trigger: 'blur' }
-        ],
-        mobile: [
-          { required: true, message: '请输入电话', trigger: 'blur' },
-          { validator: checkTelephone, trigger: 'blur' }
-        ]
+        username: [{ required: true, message: '请输入用户名', trigger: 'blur' }, { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }],
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' }, { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }],
+        email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }, { validator: checkEmail, trigger: 'blur' }],
+        mobile: [{ required: true, message: '请输入电话', trigger: 'blur' }, { validator: checkTelephone, trigger: 'blur' }]
       },
       // 修改用户表单数据
       editUser: {},
       // 修改用户表单规则验证
       edituserRules: {
-        email: [
-          { required: true, message: '请输入邮箱', trigger: 'blur' },
-          { validator: checkEmail, trigger: 'blur' }
-        ],
-        mobile: [
-          { required: true, message: '请输入电话', trigger: 'blur' },
-          { validator: checkTelephone, trigger: 'blur' }
-        ]
-      }
+        email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }, { validator: checkEmail, trigger: 'blur' }],
+        mobile: [{ required: true, message: '请输入电话', trigger: 'blur' }, { validator: checkTelephone, trigger: 'blur' }]
+      },
+      // 要分配角色的用户信息
+      userInfo: {},
+      // 角色列表
+      roleList: [],
+      // 新角色id
+      roleId: ''
     }
   },
   mounted: function() {
@@ -239,7 +234,7 @@ export default {
     },
     // 处理修改用户表单提交事件
     edituserSubmit: function() {
-      this.$refs.edituserRef.validate(async (result) => {
+      this.$refs.edituserRef.validate(async result => {
         // 验证不通过则阻止提交操作
         if (!result) return
         // 向服务端发送修改请求
@@ -271,6 +266,31 @@ export default {
       }
       this.$message.success('删除用户成功')
       this.getUserList()
+    },
+    // 分配角色对话框展示事件处理
+    setRole: async function(userInfo) {
+      this.setroledialogVisible = true
+      // 从插槽获取角色信息
+      this.userInfo = userInfo
+      // 获取所有的角色列表
+      const { data: res } = await this.$http.get('roles')
+      this.roleList = res.data
+    },
+    setroleClose: function() {
+      this.roleId = ''
+      this.userInfo = {}
+    },
+    setroleSubmit: async function() {
+      if (!this.roleId) return this.$message.info('请选择分配的新角色')
+      // 提交角色分配信息
+      console.log(this.userInfo.id, this.roleId)
+      const { data: res } = await this.$http.put(`users/${this.userInfo.id}/role`, {
+        rid: this.roleId
+      })
+      if (res.meta.status !== 200) return this.$message.error('分配角色失败')
+      this.$message.success('分配角色成功')
+      this.getUserList()
+      this.setroledialogVisible = false
     }
   }
 }

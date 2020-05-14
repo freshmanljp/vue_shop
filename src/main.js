@@ -22,6 +22,9 @@ Vue.prototype.$http = axios
 Vue.config.productionTip = false
 
 new Vue({
+  // 挂载路由对象
   router,
+  // 渲染app组件
   render: h => h(App)
+  // 挂载el元素
 }).$mount('#app')

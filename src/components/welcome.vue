@@ -5,6 +5,11 @@
 </template>
 
 <script>
+export default {
+  created () {
+    window.sessionStorage.setItem('navState', '')
+  }
+}
 </script>
 
 <style>
