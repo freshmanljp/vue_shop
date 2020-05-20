@@ -21,3 +21,6 @@ body,
 .el-tag {
   margin: 5px;
 }
+.el-cascader-panel{
+    height: 200px;
+}
