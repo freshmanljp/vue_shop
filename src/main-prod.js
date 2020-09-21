@@ -69,4 +69,5 @@ new Vue({
   // 挂载el元素
 }).$mount('#app')
 
-alert('上线环境')
+// alert('上线环境')
+console.log(process.env.NODE_ENV)
